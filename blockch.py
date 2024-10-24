@@ -9,6 +9,7 @@ class Block_chain(object):
         self.chain = []
         self.pendingTransactions = []
         
+        # Create the genesis block
         self.newBlock(previousHash="The Times 03/Jan/2009 Chancellor on brink of second bailout for banks.", the_proof=100)
 
     # Creating a new block listing key/value pairs of 
@@ -43,6 +44,20 @@ class Block_chain(object):
         self.pendingTransactions.append(the_transaction)
         return self.lastBlock['index'] + 1
 
+    # Implementing the proof of work algorithm
+    def proof_of_work(self, last_proof):
+        proof = 0
+        while not self.valid_proof(last_proof, proof):
+            proof += 1
+        return proof
+
+    # Validating the proof
+    def valid_proof(self, last_proof, proof):
+        guess = f'{last_proof}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+        # Check if the hash starts with 4 leading zeroes
+        return guess_hash[:4] == "0000"
+
     # receiving one block. Turning it into a string, turning that into 
     # Unicode (for hashing). Hashing with SHA256 encryption, 
     # then translating the Unicode into a hexadecimal string.
@@ -59,12 +74,18 @@ block_chain = Block_chain()
 transaction1 = block_chain.newTransaction("Satoshi", "Alex", '10 BTC')
 transaction2 = block_chain.newTransaction("Alex", "Satoshi", '2 BTC')
 transaction3 = block_chain.newTransaction("Satoshi", "James", '10 BTC')
-block_chain.newBlock(10123)
+# Calculate the proof for the new block
+last_proof = block_chain.lastBlock['proof']
+proof = block_chain.proof_of_work(last_proof)
+block_chain.newBlock(proof)
 
 transaction4 = block_chain.newTransaction("Alex", "Lucy", '2 BTC')
 transaction5 = block_chain.newTransaction("Lucy", "Justin", '1 BTC')
 transaction6 = block_chain.newTransaction("Justin", "Alex", '1 BTC')
-block_chain.newBlock(10384)
+# Calculate the proof for the new block
+last_proof = block_chain.lastBlock['proof']
+proof = block_chain.proof_of_work(last_proof)
+block_chain.newBlock(proof)
 
 # Printing the blockchain data in an organized manner
 print("Blockchain:")
